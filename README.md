@@ -1,4 +1,4 @@
-# electron-vue-example
+# clickable-image
 
 ## Project setup
 ```
