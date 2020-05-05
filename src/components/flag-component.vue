@@ -5,10 +5,17 @@
       <img
         v-for="flag in flags"
         :key="flag.id"
+        v-on:contextmenu="displayRightClkMenu" 
         class="flag"
         :style="{top:flag.imgTop, left:flag.imgLeft}"
       />
     </div>
+
+    <!-- <v-menu v-model="showMenu" :position-x="x" :position-y="y" absolute offset-y>
+        <div v-for="menuItem in menuItems" :key="menuItem" @click="clickAction">
+          <a>{{menuItem}}</a>
+        </div>
+    </v-menu>-->
   </div>
 </template>
 
@@ -33,17 +40,33 @@ export default {
             imgLeft: imgLeft
           };
           this.flags.push(flagJson);
-          console.log(this.flags);
         })
         .catch(error => {
           console.log(error);
         });
+    },
+
+    displayRightClkMenu(e) {
+      e.preventDefault();
+      this.showMenu = false;
+      this.x = e.clientX;
+      this.y = e.clientY;
+      this.$nextTick(() => {
+        this.showMenu = true;
+      });
+    },
+
+    clickAction() {
+      console.log("I've been clicked");
     }
   },
-
   data() {
     return {
-      flags: []
+      flags: [],
+      showMenu: false,
+      x: 0,
+      y: 0,
+      menuItems: ["delete"]
     };
   },
 
@@ -58,7 +81,7 @@ export default {
           var flagJson = {
             id: response.data.data[key].id,
             imgLeft: response.data.data[key].xcoord,
-            imgTop: response.data.data[key].ycoord,
+            imgTop: response.data.data[key].ycoord
           };
           flagsArray.push(flagJson);
         }
