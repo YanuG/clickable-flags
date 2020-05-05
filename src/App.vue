@@ -1,17 +1,17 @@
 <template>
   <div>
-    <app-grid></app-grid>
+    <flag-component></flag-component>
   </div>
 </template>
 
 
 <script>
 
-import Grid from "./components/Grid.vue";
+import FlagComponent from "./components/flag-component.vue";
 
 export default {
   components: {
-    "app-grid": Grid
+    "flag-component": FlagComponent,
   },
 
   data() {

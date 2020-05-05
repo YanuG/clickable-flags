@@ -1,7 +1,9 @@
 var sqlite3 = require("sqlite3");
+var express = require("express");
 
+var app = express();
+var HTTP_PORT = 8000
 var db = new sqlite3.Database("flags.db", sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE);
-
 
 db.get("SELECT name FROM sqlite_master WHERE type='table' AND name = 'flags'",
 function(err, data)
@@ -10,117 +12,97 @@ function(err, data)
     {
         db.serialize(function()
         {
-            db.run("CREATE TABLE flags (id INTEGER PRIMARY KEY AUTOINCREMENT , xcoord FLOAT NOT NULL, ycoord FLOAT NOT NULL)", function()
+            db.run("CREATE TABLE flags (id INTEGER PRIMARY KEY AUTOINCREMENT , xcoord string NOT NULL, ycoord string NOT NULL)", function()
             {});
                 
         })
     }
 });
 
+app.use(express.json()) // for parsing application/json
+app.listen(HTTP_PORT, () => {
+    console.log("Server running on port %PORT%".replace("%PORT%",HTTP_PORT))
+});
 
-function getAllFlags()
-{
-    var res = {};
+app.get("/api/flags", (req, res, next) => {
+
     var sql = "select * from flags"
     var params = [];
     
     db.all(sql, params, (err, rows) => {
         if (err) {
-            res['message'] = 'errors';
-            res['data'] = err.message;
+            res.status(400).json({"error":err.message});
+            return;
         }
-        res['message'] = 'success';
-        res['data'] = rows;
+        res.json({
+            "message": "success",
+            "data": rows
+        })
     });
 
-    return res;
-}
+});
 
-function getFlag(id) 
-{
-    var res = {};
+app.get("/api/flags/:id" , (req, res, next) => {
     var sql = "SELECT * from flags where id = ?"
-    var params = [id]
+    var params = [req.params.id]
     db.get(sql, params, (err, row) => {
         if (err) {
-            res['message'] = 'errors';
-            res['data'] = err.message;
+            res.status(400).json({"error":err.message});
+            return;
         }
-        res['message'] = 'success';
-        res['data'] = row;
+        res.json({
+            "message": "success",
+            "data": rows
+        })
     });
+});
 
-    return res;
-}
-
-function setFlag(xcoord , ycoord) 
-{
-    var res = {};
+app.post("/api/flags" , (req, res, next) =>  {
+    console.log(req.body);
     var errors = []
-    if (!xcoord){
+    var data = {
+        xcoord: req.body['xcoord'],
+        ycoord: req.body['ycoord']
+    }
+    if (!data.xcoord){
         errors.push("No x coordinated specified");
     }
-    if (!ycoord){
+    if (!data.ycoord){
         errors.push("No y coordinated specified");
     }
     if (errors.length){
-        res['message'] = 'errors';
-        res['data'] = errors;
+        res.status(400).json({"error":errors.join(",")});
+        return;
     }
-
     var sql = 'INSERT INTO flags (xcoord, ycoord) VALUES (?,?)'
-    var params = [xcoord , ycoord]
+    var params = [data.xcoord , data.ycoord]
     db.run(sql , params, function(err){
         if (err) {
-            res['message'] = 'errors';
-            res['data'] = err;
+            res.status(400).json({"error": err.message})
+            return;
         }
-        db.get("SELECT last_insert_rowid() as id", function (err, row) {
-            if (err) {
-                res['message'] = 'errors';
-                res['data'] = err;
-            }
-            res['message'] = 'success';
-            res['data'] = row['id'];
-        });
-        
-        
+        res.json({
+            "message": "success",
+            "data": data,
+            "id" : this.lastID
+        })
     }); 
-    return res;
-}
+});
 
-function deleteFlag(id)
+app.delete("/api/flags/:id" , (res, req, next) => 
 {
-    var res = {};
     db.run(
         'DELETE FROM flags WHERE id = ?',
         id,
         function (err) {
            if (err) {
-            res['message'] = 'errors';
-            res['data'] = err;
+            res.status(400).json({"error": res.message})
+            return;
            }
-           res['message'] = 'success';
-           res['data'] = this.changes;
+           res.json({"message":"deleted", rows: this.changes})
     });
-    return res;
-}
+});
 
-module.exports = {
-    
-    getAllFlags() {
-        return getAllFlags();
-    },
-
-    getFlag: function(id){
-        return getFlag(id);
-    },
-    
-    setFlag: function(xcoord, ycoord) {
-        return setFlag(xcoord, ycoord);
-    },
-
-    deleteFlag: function(id) {
-        return deleteFlag(id);
-    }
-}
+app.get("/", (req, res, next) => {
+    res.json({"message":"Ok"})
+});
