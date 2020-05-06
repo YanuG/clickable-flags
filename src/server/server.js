@@ -59,7 +59,6 @@ app.get("/api/flags/:id", (req, res, next) => {
 });
 
 app.post("/api/flags", (req, res, next) => {
-    console.log(req.body);
     var errors = []
     var data = {
         xcoord: req.body['xcoord'],

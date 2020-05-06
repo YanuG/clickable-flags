@@ -1,28 +1,26 @@
 <template>
-  <div id="data-app">
-    <v-app id="inspire">
-      <h1>Clickable image</h1>
-      <div class="container" v-on:click="leftClickHandle" />
-      <img
-        v-for="(flag, index) in flags"
-        :key="flag.id"
-        class="flag"
-        v-on:contextmenu="displayRightClkMenu(flag, index)"
-        :style="{top:flag.imgTop, left:flag.imgLeft}"
-      />
-      <v-menu v-model="showMenu" :position-x="x" :position-y="y" absolute offset-y>
-        <v-list>
-          <v-list-item
-            v-for="menuItem in menuItems"
-            :key="menuItem"
-            @click="rightClickAction(menuItem)"
-          >
-            <v-list-item-title>{{menuItem}}</v-list-item-title>
-          </v-list-item>
-        </v-list>
-      </v-menu>
-    </v-app>
-  </div>
+  <v-app id="data-app">
+    <h1>Clickable flags</h1>
+    <div class="container" v-on:click="leftClickHandle" />
+    <img
+      v-for="(flag, index) in flags"
+      :key="flag.id"
+      class="flag"
+      v-on:contextmenu="displayRightClkMenu(flag, index)"
+      :style="{top:flag.imgTop, left:flag.imgLeft}"
+    />
+    <v-menu v-model="showMenu" :position-x="x" :position-y="y" absolute offset-y>
+      <v-list>
+        <v-list-item
+          v-for="menuItem in menuItems"
+          :key="menuItem"
+          @click="rightClickAction(menuItem)"
+        >
+          <v-list-item-title>{{menuItem}}</v-list-item-title>
+        </v-list-item>
+      </v-list>
+    </v-menu>
+  </v-app>
 </template>
 
 
@@ -69,18 +67,16 @@ export default {
         this.selected_flag.flags_array_id = id;
       });
     },
-
+    /* eslint-disable no-unused-vars */
     rightClickAction(menuItem) {
       if (menuItem == this.menuItems[0]) {
         // delete
         var flag_id = this.selected_flag.flag.id;
-        console.log(flag_id);
         axios
           .delete(`http://localhost:8000/api/flags/${flag_id}`, {
             data: { id: flag_id }
           })
           .then(response => {
-            console.log(response);
             this.$delete(this.flags, this.selected_flag.flags_array_id);
           })
           .catch(error => {
@@ -88,6 +84,7 @@ export default {
           });
       }
     }
+    /* eslint-enable no-unused-vars */
   },
   data() {
     return {
