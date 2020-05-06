@@ -1,4 +1,4 @@
-# clickable-image
+# clickable-flags
 
 ## Project setup
 ```
