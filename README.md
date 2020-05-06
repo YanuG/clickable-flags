@@ -14,6 +14,3 @@ node server.js
 ```
 npm run electron:serve
 ```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
