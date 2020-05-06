@@ -92,8 +92,6 @@ app.post("/api/flags", (req, res, next) => {
 });
 
 app.delete("/api/flags/:id", (req, res, next) => {
-
-    console.log(req.params.id);
     var sql = 'DELETE FROM flags WHERE id = ?';
     var params = [req.params.id];
     db.run(
