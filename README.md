@@ -1,5 +1,7 @@
 # clickable-flags
 
+Simple electron app that responses to user click events to display or remove flags.
+
 ## Project setup
 ```
 npm install
