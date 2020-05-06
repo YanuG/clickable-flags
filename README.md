@@ -7,22 +7,12 @@ npm install
 
 ### Run server
 ```
-node database.js
+node server.js
 ```
 
 ### Compiles and hot-reloads for development
 ```
 npm run electron:serve
-```
-
-### Compiles and minifies for production
-```
-npm run build
-```
-
-### Lints and fixes files
-```
-npm run lint
 ```
 
 ### Customize configuration

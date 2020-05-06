@@ -1,21 +1,27 @@
 <template>
-  <div id="vue-app">
-    <h1>Clickable image</h1>
-    <div class="container" v-on:click="addFlag">
+  <div id="data-app">
+    <v-app id="inspire">
+      <h1>Clickable image</h1>
+      <div class="container" v-on:click="leftClickHandle" />
       <img
-        v-for="flag in flags"
+        v-for="(flag, index) in flags"
         :key="flag.id"
-        v-on:contextmenu="displayRightClkMenu" 
         class="flag"
+        v-on:contextmenu="displayRightClkMenu(flag, index)"
         :style="{top:flag.imgTop, left:flag.imgLeft}"
       />
-    </div>
-
-    <!-- <v-menu v-model="showMenu" :position-x="x" :position-y="y" absolute offset-y>
-        <div v-for="menuItem in menuItems" :key="menuItem" @click="clickAction">
-          <a>{{menuItem}}</a>
-        </div>
-    </v-menu>-->
+      <v-menu v-model="showMenu" :position-x="x" :position-y="y" absolute offset-y>
+        <v-list>
+          <v-list-item
+            v-for="menuItem in menuItems"
+            :key="menuItem"
+            @click="rightClickAction(menuItem)"
+          >
+            <v-list-item-title>{{menuItem}}</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
+    </v-app>
   </div>
 </template>
 
@@ -46,18 +52,41 @@ export default {
         });
     },
 
-    displayRightClkMenu(e) {
-      e.preventDefault();
+    leftClickHandle() {
+      if (this.showMenu) this.showMenu = false;
+      else this.addFlag();
+    },
+
+    displayRightClkMenu(flag, id) {
+      event.preventDefault();
       this.showMenu = false;
-      this.x = e.clientX;
-      this.y = e.clientY;
+      this.x = event.clientX;
+      this.y = event.clientY;
+      this.selected_flag = {};
       this.$nextTick(() => {
         this.showMenu = true;
+        this.selected_flag.flag = flag;
+        this.selected_flag.flags_array_id = id;
       });
     },
 
-    clickAction() {
-      console.log("I've been clicked");
+    rightClickAction(menuItem) {
+      if (menuItem == this.menuItems[0]) {
+        // delete
+        var flag_id = this.selected_flag.flag.id;
+        console.log(flag_id);
+        axios
+          .delete(`http://localhost:8000/api/flags/${flag_id}`, {
+            data: { id: flag_id }
+          })
+          .then(response => {
+            console.log(response);
+            this.$delete(this.flags, this.selected_flag.flags_array_id);
+          })
+          .catch(error => {
+            console.log(error);
+          });
+      }
     }
   },
   data() {
@@ -66,7 +95,8 @@ export default {
       showMenu: false,
       x: 0,
       y: 0,
-      menuItems: ["delete"]
+      menuItems: ["delete"],
+      selected_flag: {}
     };
   },
 
@@ -77,7 +107,6 @@ export default {
         const keys = Object.keys(response.data.data);
         var flagsArray = [];
         for (const key of keys) {
-          response.data.data[key].id = key;
           var flagJson = {
             id: response.data.data[key].id,
             imgLeft: response.data.data[key].xcoord,
@@ -86,7 +115,6 @@ export default {
           flagsArray.push(flagJson);
         }
         this.flags = flagsArray;
-        this.flags_length = this.flags.length - 1;
       })
       .catch(error => {
         console.log(error);
