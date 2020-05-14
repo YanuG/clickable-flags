@@ -1,6 +1,6 @@
 # clickable-flags
 
-Simple electron app that responses to user click events to display or remove flags.
+Simple electron app that responses to a user click events to display or remove flags.
 
 ## Project setup
 ```
